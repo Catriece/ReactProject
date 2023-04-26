@@ -1,4 +1,5 @@
 import { Component } from "react";
+import FilmsList  from "./components/filmsList";
 import './App.css';
 
 class App extends Component {
@@ -8,6 +9,7 @@ class App extends Component {
     this.state = {
       list: ["ready", "set", "go"],
       text: "",
+      films: [],
     }
 
     this.onSubmit = this.onSubmit.bind(this);
@@ -34,6 +36,7 @@ class App extends Component {
             return <li key={item + idx}>{item}</li>;
           })}
         </ul>
+        <FilmsList />
       </div>
     )
   }
