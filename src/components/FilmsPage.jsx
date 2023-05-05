@@ -18,11 +18,14 @@ function FilmsList(props) {
 
 
     return (
-        <ul>
-            {list.map((film) => {
-                return <li key={film.id}>{film.title}</li>
-            })}
-        </ul>
+        <div>
+            <h1>Studio Ghibli Films</h1>
+            <ul>
+                {list.map((film) => {
+                    return <li key={film.id}>{film.title}</li>
+                })}
+            </ul>
+        </div>
     );
 }
 
