@@ -1,66 +1,120 @@
 import { useState, useEffect } from "react";
-import { filterFilmsByDirector, getListOf, getFilmStats } from '../helpers/film.helpers'
-import { Link } from 'react-router-dom';
-
+import {
+  filterFilmsByDirector,
+  getListOf,
+  getFilmStats,
+} from "../helpers/film.helpers";
+import { Link } from "react-router-dom";
+import { MainLayout, Loader } from "../components";
+import {
+  Form,
+  Card,
+  ListGroup,
+  ListGroupItem,
+  Row,
+  Col,
+  Badge,
+} from "react-bootstrap";
 
 function FilmsPage(props) {
-    let [list, setList] = useState([]);
-    let [searchDirector, setSearchDirector] = useState("");
+  let [list, setList] = useState([]);
+  let [searchDirector, setSearchDirector] = useState("");
+  let [isLoaded, setIsLoaded] = useState(false);
 
-    function getFilms() {
-        fetch("https://studioghibliapi-d6fc8.web.app/films")
-        .then((res) => res.json())
-        .then((films) => setList(films))
-        .catch((err) => console.error(err))
-    }
+  function getFilms() {
+    fetch("https://studioghibliapi-d6fc8.web.app/films")
+      .then((res) => res.json())
+      .then((films) => {
+        setList(films);
+        setIsLoaded(true);
+      })
+      .catch((err) => console.error(err));
+  }
 
-   useEffect(() => {
+  useEffect(() => {
     getFilms();
-   }, []);
+  }, []);
 
-   let filmsByDirector = filterFilmsByDirector(list, searchDirector);
+  let filmsByDirector = filterFilmsByDirector(list, searchDirector);
 
-   let directors = getListOf(list, "director")
-   let { avg_score, latest, total } = getFilmStats(filmsByDirector)
+  let directors = getListOf(list, "director");
+  let { avg_score, latest, total } = getFilmStats(filmsByDirector);
 
+  if (!isLoaded) {
     return (
-        <div>
-            <h1>Studio Ghibli Films</h1>
-            <form>
-                <div className="form-group">
-                    <label></label>
-                    <select name="searchDirector" id="searchDirector" value={searchDirector} onChange={(e) => setSearchDirector(e.target.value)}>
-                        <option value="">All</option>
-                        {directors.map((director, idx) => { 
-                            return (
-                            <option key={director + idx} value={director}>{director}
-                            </option>
-                        );
-                        })}
-                    </select>
-                </div>
-            </form>
-            <div>
-            <div>
-                <span># Of Films</span>
-                <span>{total}</span>
-            </div>
-            <div>
-                <span>Average Rating</span>
-                <span>{avg_score.toFixed(2)}</span>
-            </div>
-            <div>
-                <span>Latest Film</span>
-                <span>{latest}</span>
-            </div>
-            </div>
-            <ul>
-                {filmsByDirector.map((film) => {
-                    return <li key={film.id}><Link to={`/films/${film.id}`}>{film.title}</Link></li>
-                })}
-            </ul>
-        </div>
+      <MainLayout className="text-center">
+        <Loader size={40} />
+      </MainLayout>
     );
+  }
+
+  return (
+    <MainLayout>
+      <div className="">
+        <h1>Studio Ghibli Films</h1>
+        <Form>
+          <Form.Group className="mb-3" controlId="searchDirector">
+            <Form.Label>Filter by Director</Form.Label>
+            <Form.Select
+              value={searchDirector}
+              onChange={(e) => setSearchDirector(e.target.value)}
+            >
+              <option value="">All</option>
+              {directors.map((item, idx) => {
+                return (
+                  <option key={idx} value={item}>
+                    {item}
+                  </option>
+                );
+              })}
+            </Form.Select>
+          </Form.Group>
+        </Form>
+        <Row>
+          <Col>
+            <Card>
+              <Card.Body>
+                <div className="d-flex justify-content-between">
+                  <small># Of Films</small>
+                  <Badge bg="dark">{total}</Badge>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col>
+            <Card>
+              <Card.Body>
+                <div className="d-flex justify-content-between">
+                  <small>Average Rating</small>
+                  <Badge bg="dark">{avg_score.toFixed(2)}</Badge>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col>
+            <Card>
+              <Card.Body>
+                <div className="d-flex justify-content-between">
+                  <small>Latest Film</small>
+                  <Badge bg="dark">{latest}</Badge>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        <hr />
+        <ListGroup>
+          {filmsByDirector.map((item) => {
+            return (
+              <ListGroupItem key={item.id}>
+                <Link to={`${item.id}`}>{item.title}</Link>
+              </ListGroupItem>
+            );
+          })}
+        </ListGroup>
+      </div>
+    </MainLayout>
+  );
 }
 
 export default FilmsPage;
